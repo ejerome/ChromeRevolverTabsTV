@@ -8,3 +8,6 @@ Then you only need a Chrome extension to loop over these tabs with a timer (Revo
 * it will start a new fresh Chrome webBrowser window with all your tabs
 
 To create a "one click" launcher, you could create a windows shortcut which will call this script with the roslyn csi.exe using working directory where you have all your files you want to show in tabs (.url, .jpg, .webp...)
+
+Advices: 
+ * To display youtube video in loop and/or only part of the video, you could create a network shortcut .url file using http://www.infinitelooper.com/.
