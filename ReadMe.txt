@@ -1,4 +1,4 @@
-Launch as many compatible files found in the current directory as Chrome tabs.
+Launch as many compatible files found in the current directory as Chrome tabs you want to launch with those files.
 
 Then you only need a Chrome extension to loop over these tabs with a timer (RevolverTabs is a good one).
 
