@@ -9,7 +9,7 @@ using System;
  
 Console.WriteLine($"CurrentDir : {Environment.CurrentDirectory}");
 
-string roslynFolderNameToExclude = "Roslyn-VS-2015";
+string roslynFolderNameToExclude = "roslynScriptFromMSBUILD14.0";
 string archivesFolderNameToExclude = "Archives";
 
 var batFile = Environment.CurrentDirectory + "\\ChromeTV.bat";
