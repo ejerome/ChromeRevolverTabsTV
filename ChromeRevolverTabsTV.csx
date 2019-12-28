@@ -4,16 +4,13 @@ using System;
 // Small C# script which parse the current directory (except the roslyn one which is used to execute this script)
 // to create a .bat file which allow to open Chrome with as many tabs there are items in the parsed folder
 // it filter items by extension (skiping binaries and scripts), but allowing media files
-// this bat is hidden because only used to check the commands and arguments, as
-// this programm will auto start this generated bat file 
-
-// Then, in addition to this file, you could create a windows shortcut which
-// will call this script with the roslyn csi.exe using working directory 
-// where you have all your files you want to show in tabs (.url, .jpg, .webp...).
+// this bat is hidden because only used to check the commands and arguments
+// This programm will auto start this generated bat file 
  
 Console.WriteLine($"CurrentDir : {Environment.CurrentDirectory}");
 
-string roslynFolderNameToExclude = "roslynScriptFromMSBUILD14.0";
+string roslynFolderNameToExclude = "Roslyn-VS-2015";
+string archivesFolderNameToExclude = "Archives";
 
 var batFile = Environment.CurrentDirectory + "\\ChromeTV.bat";
 using (FileStream fs = new FileStream(batFile, FileMode.OpenOrCreate)) 
@@ -22,7 +19,11 @@ using (FileStream fs = new FileStream(batFile, FileMode.OpenOrCreate))
 	{	
 		string[] fileEntries = 
 			System.IO.Directory.GetFiles(Environment.CurrentDirectory, "*.*", System.IO.SearchOption.AllDirectories)
-			.Where(d => !d.StartsWith(roslynFolderNameToExclude)).ToArray();
+			.Where(d => !d.Contains(roslynFolderNameToExclude))
+			.Where(d => !d.Contains(archivesFolderNameToExclude))
+			.ToArray();
+		
+		writer.Write($"start chrome");
 		
 		foreach (var file in fileEntries)
 		{
@@ -35,17 +36,18 @@ using (FileStream fs = new FileStream(batFile, FileMode.OpenOrCreate))
 			{
 				continue; // skip bat, exe and exe shortcut link (exclude all binaries and scripts)
 			}
-			if (ext == ".jpg" || ext == ".png")
-			{		
+			if (ext == ".webm" || ext == ".WEBM" || ext == ".JPG" || ext == ".jpg" || ext == ".png" || ext == ".PNG")
+			{	
 				var uri = new Uri(absFile);
-				entry = Uri.UnescapeDataString(uri.AbsoluteUri);
-				
-				writer.WriteLine($"start chrome \"{entry}\" &");
+				entry = Uri.UnescapeDataString(uri.AbsoluteUri).ToString();				
+				writer.Write($" \"{entry}\"");
 			}
 			if(ext == ".url")
 			{
-				entry = absFile;
-				writer.WriteLine($"\"{entry}\" &");
+				entry = File.ReadLines(absFile).Where(l => l.StartsWith("URL=")).First();
+				entry = entry.Split('=').AsEnumerable().ElementAt(1);
+
+				writer.Write($" \"{entry}\"");
 			}
 			
 			if(!string.IsNullOrWhiteSpace(entry))
@@ -61,8 +63,7 @@ using (FileStream fs = new FileStream(batFile, FileMode.OpenOrCreate))
 		
 		System.IO.File.SetAttributes(batFile, System.IO.File.GetAttributes(batFile) | System.IO.FileAttributes.Hidden);
 		
-		Console.WriteLine($"RestartChrome with : {batFile}");
-		RestartChrome(batFile);
+		Start(batFile);
 	}
 }
 
@@ -82,15 +83,9 @@ public static string UNCPath(string absPath)
     return absPath;
 }
 
-public static void RestartChrome(string batFile)
+public static void Start(string batFile)
 {
-	Process [] chromeInstances = Process.GetProcessesByName("chrome");
-
-	foreach(Process p in chromeInstances)
-		p.Kill();
-	
-	var processInfo = new ProcessStartInfo("cmd.exe", "/c " + batFile);
+	Console.WriteLine($"Start Chrome with : {batFile}");
+	var processInfo = new ProcessStartInfo("cmd.exe", $"/c \"{batFile}\"");
 	Process.Start(processInfo);
 }
-
-// jesnault
